@@ -5,37 +5,28 @@
 #include <memory>
 #include "fstream"
 #include "MyDB_PageHandle.h"
-#include "MyDB_BufferPage.h"
-
+#include "MyDB_BufferManager.h"
 
 
 void *MyDB_PageHandleBase :: getBytes () {
-    return nullptr;
+    
+    tempLinkToPage =  bufferMgr->findPage(DBTable,numPageOnDisk);
+    return tempLinkToPage->page;
 }
 
 void MyDB_PageHandleBase :: wroteBytes () {
+    if (tempLinkToPage) {
+        tempLinkToPage->isWriten();
+    }
 }
 
 MyDB_PageHandleBase :: ~MyDB_PageHandleBase () {
-//    counter = 0;
-//    if (isDirty) {
-//        if (pageNumberOnDisk == -1) {
-//            std::ofstream toTemp (filepPath,std::ofstream::app);
-//            toTemp.write(page, length);
-//            toTemp.flush();
-//            toTemp.close();
-//        }
-//        else {
-//            std::ofstream toFile (filepPath,std::ofstream::in);
-//            toFile.seekp(pageNumberOnDisk * length, ios::beg);
-//            toFile.write(page, length);
-//            toFile.flush();
-//            toFile.close();
-//        }
-//    }
 }
 
-MyDB_PageHandleBase :: MyDB_PageHandleBase (MyDB_BufferPage pg) : page(pg){
+MyDB_PageHandleBase :: MyDB_PageHandleBase (MyDB_TablePtr table, long i, MyDB_BufferManager* bufMgr){
+    this->DBTable = table;
+    this->numPageOnDisk = i;
+    this->bufferMgr = bufMgr;
 }
 
 void MyDB_PageHandleBase :: pin() {

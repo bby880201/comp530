@@ -34,10 +34,16 @@ public:
 	~MyDB_PageHandleBase ();
 
 	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS
-
+    
+    MyDB_PageHandleBase (char* buf, size_t len, long count);
+    
 private:
 
 	// YOUR CODE HERE
+    bool isDirty;
+    long counter;
+    char* page;
+    size_t length;
 };
 
 #endif

@@ -8,6 +8,10 @@
 using namespace std;
 
 class MyDB_BufferManager {
+    
+    char* bfPool;
+    MyDB_PageHandle* handlePool;
+    long counter;
 
 public:
 
@@ -52,6 +56,10 @@ public:
 private:
 
 	// YOUR STUFF HERE
+    
+    //To check if a page is in ram or not
+    bool isBuffered(MyDB_TablePtr whichTable, long i);
+    
 
 };
 
