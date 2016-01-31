@@ -46,11 +46,6 @@ public:
     
     MyDB_PageHandleBase (MyDB_TablePtr table, long i, MyDB_BufferManager* bufMgr);
     
-    //Pin the page to buffer
-    void pin();
-    //Unpin the page from buffer
-    void unpin();
-    
 private:
 	// YOUR CODE HERE
     

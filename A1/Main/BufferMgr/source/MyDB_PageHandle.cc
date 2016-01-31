@@ -6,7 +6,7 @@
 #include "fstream"
 #include "MyDB_PageHandle.h"
 #include "MyDB_BufferManager.h"
-
+#include <iostream>
 
 void *MyDB_PageHandleBase :: getBytes () {
     
@@ -21,19 +21,16 @@ void MyDB_PageHandleBase :: wroteBytes () {
 }
 
 MyDB_PageHandleBase :: ~MyDB_PageHandleBase () {
+    bufferMgr->dereference(DBTable, numPageOnDisk);
 }
 
 MyDB_PageHandleBase :: MyDB_PageHandleBase (MyDB_TablePtr table, long i, MyDB_BufferManager* bufMgr){
+    this->tempLinkToPage = nullptr;
     this->DBTable = table;
     this->numPageOnDisk = i;
     this->bufferMgr = bufMgr;
 }
 
-void MyDB_PageHandleBase :: pin() {
-}
-
-void MyDB_PageHandleBase:: unpin() {
-}
 
 #endif
 

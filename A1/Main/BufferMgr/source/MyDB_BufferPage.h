@@ -34,4 +34,4 @@ public:
 };
 
 
-#endif /* MyDB_BufferPage_hpp */
+#endif /* MyDB_BufferPage_h */

@@ -17,6 +17,8 @@ public:
     size_t pageSize;
     size_t numPages;
     MyDB_TablePtr tempFile;
+    long tempFileOffset;
+    list<long> availTempSlot;
     char* bufPool;
     long counter;
     unordered_map<string, MyDB_BufferPage*> pageLookUp;
@@ -64,21 +66,24 @@ public:
 	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS
     
     MyDB_BufferPage* findPage(MyDB_TablePtr tablePtr, long i);
-
+    
+    void pin (MyDB_PageHandle pinMe);
+    
+    void dereference(MyDB_TablePtr whichTable, long i);
+    
 private:
 
 	// YOUR STUFF HERE
-    
-    //To check if a page is in ram or not
-    bool isBuffered(MyDB_TablePtr whichTable, long i);
-    
-    char* getBuffer();
     
     void refreshPage(MyDB_BufferPage* pg);
     
     MyDB_BufferPage* getNewPage(MyDB_TablePtr ptr, long pn);
     
     void evictPage(MyDB_BufferPage* pg);
+    
+    string getKey(MyDB_TablePtr tablePtr, long i);
+    
+    void markTempSpace();
 };
 
 #endif

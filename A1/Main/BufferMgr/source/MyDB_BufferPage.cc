@@ -7,6 +7,7 @@
 //
 
 #include "MyDB_BufferPage.h"
+#include <iostream>
 #include <string>
 
 MyDB_BufferPage :: MyDB_BufferPage(char* buf, long count, MyDB_TablePtr ptr, long pn) {
@@ -20,7 +21,6 @@ MyDB_BufferPage :: MyDB_BufferPage(char* buf, long count, MyDB_TablePtr ptr, lon
 }
 
 MyDB_BufferPage :: ~MyDB_BufferPage() {
-    
 }
 
 void MyDB_BufferPage :: isWriten(){
