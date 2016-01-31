@@ -185,7 +185,7 @@ void MyDB_BufferManager:: evictPage(MyDB_BufferPage* pg){
 }
 
 MyDB_BufferPage* MyDB_BufferManager :: findPage(MyDB_TablePtr tablePtr, long i) {
-    MyDB_BufferPage* pg;
+    MyDB_BufferPage* pg = nullptr;
     
     if (tablePtr) {
         string loc = getKey(tablePtr, i);

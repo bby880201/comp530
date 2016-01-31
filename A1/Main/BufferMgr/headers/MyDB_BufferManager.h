@@ -4,16 +4,28 @@
 
 #include "MyDB_PageHandle.h"
 #include "MyDB_Table.h"
+#include "MyDB_BufferPage.h"
+#include <unordered_map>
+#include <list>
 
 using namespace std;
 
 class MyDB_BufferManager {
     
-    char* bfPool;
-    MyDB_PageHandle* handlePool;
-    long counter;
-
 public:
+        
+    size_t pageSize;
+    size_t numPages;
+    MyDB_TablePtr tempFile;
+    long tempFileOffset;
+    list<long> availTempSlot;
+    char* bufPool;
+    long counter;
+    unordered_map<string, MyDB_BufferPage*> pageLookUp;
+    list<MyDB_BufferPage*> LRUMgr;
+    list<MyDB_BufferPage*> pinnedPage;
+
+
 
 	// THESE METHODS MUST APPEAR AND THE PROTOTYPES CANNOT CHANGE!
 
@@ -51,16 +63,26 @@ public:
 	// and any temporary files need to be deleted
 	~MyDB_BufferManager ();
 
-	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS 
-
+	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS
+    
+    MyDB_BufferPage* findPage(MyDB_TablePtr tablePtr, long i);
+    
+    void pin (MyDB_PageHandle pinMe);
+    
+    void dereference(MyDB_TablePtr whichTable, long i);
+    
 private:
 
 	// YOUR STUFF HERE
     
-    //To check if a page is in ram or not
-    bool isBuffered(MyDB_TablePtr whichTable, long i);
+    void refreshPage(MyDB_BufferPage* pg);
     
-
+    MyDB_BufferPage* getNewPage(MyDB_TablePtr ptr, long pn);
+    
+    void evictPage(MyDB_BufferPage* pg);
+    
+    string getKey(MyDB_TablePtr tablePtr, long i);
+    
 };
 
 #endif

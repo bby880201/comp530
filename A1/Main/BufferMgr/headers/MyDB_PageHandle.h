@@ -2,16 +2,25 @@
 #ifndef PAGE_HANDLE_H
 #define PAGE_HANDLE_H
 
+#include "MyDB_BufferPage.h"
+#include "MyDB_Table.h"
 #include <memory>
+#include <string>
 
 // page handles are basically smart pointers
 using namespace std;
 class MyDB_PageHandleBase;
+class MyDB_BufferManager;
 typedef shared_ptr <MyDB_PageHandleBase> MyDB_PageHandle;
 
 class MyDB_PageHandleBase {
 
 public:
+    
+    MyDB_TablePtr DBTable;
+    long numPageOnDisk;
+    MyDB_BufferManager* bufferMgr;
+    MyDB_BufferPage* tempLinkToPage;
 
 	// THESE METHODS MUST BE IMPLEMENTED WITHOUT CHANGING THE DEFINITION
 
@@ -35,15 +44,11 @@ public:
 
 	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS
     
-    MyDB_PageHandleBase (char* buf, size_t len, long count);
+    MyDB_PageHandleBase (MyDB_TablePtr table, long i, MyDB_BufferManager* bufMgr);
     
 private:
-
 	// YOUR CODE HERE
-    bool isDirty;
-    long counter;
-    char* page;
-    size_t length;
+    
 };
 
 #endif
