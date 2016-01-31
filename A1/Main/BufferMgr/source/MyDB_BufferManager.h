@@ -83,7 +83,6 @@ private:
     
     string getKey(MyDB_TablePtr tablePtr, long i);
     
-    void markTempSpace();
 };
 
 #endif

@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <iostream>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -41,7 +45,6 @@ MyDB_PageHandle MyDB_BufferManager :: getPage () {
         availTempSlot.pop_front();
     } else {
         i = tempFileOffset;
-        markTempSpace();
         tempFileOffset++;
     }
     
@@ -136,11 +139,23 @@ MyDB_BufferPage* MyDB_BufferManager :: getNewPage(MyDB_TablePtr ptr, long pn){
     }else {
         pg = LRUMgr.front();
         evictPage(pg);
+
         pg->tablePtr = ptr;
         pg->pageNumberOnDisk = pn;
         pg->counter = counter;
         pg->isDirty = 0;
         pg->numReference = 0;
+        
+        string filePath = pg->tablePtr->getStorageLoc();
+        
+        int fd = open(filePath.c_str(), O_SYNC|O_CREAT|O_RDONLY, S_IRUSR|S_IWUSR);
+        if (fd<0) {
+            cout<<"File opening error: "<<errno<<endl;
+        }else{
+            lseek(fd, pg->pageNumberOnDisk*pageSize, SEEK_SET);
+            if (read(fd, pg->page,pageSize)<0) cout<<"File writing error: "<<errno<<endl;
+            if (close(fd) < 0) cout<<"File Descriptor closing error: "<<errno<<endl;
+        }
         
         pageLookUp[ptr->getStorageLoc() + "-" + to_string(pn)] = pg;
         pg->numReference++;
@@ -153,42 +168,18 @@ MyDB_BufferPage* MyDB_BufferManager :: getNewPage(MyDB_TablePtr ptr, long pn){
 
 void MyDB_BufferManager:: evictPage(MyDB_BufferPage* pg){
     string filePath = pg->tablePtr->getStorageLoc();
+    
     if (pg->isDirty) {
-        fstream toFile = fstream(filePath);
-        if (!toFile){
-            toFile.close();
-            ofstream toFile(filePath,ofstream::out);
-            for (int i =0; i< pg->pageNumberOnDisk; i++) {
-                toFile.write(pg->page, pageSize);
-                toFile.flush();
-            }
-            toFile.close();
-        } else {
-            toFile.seekg (ios::beg, toFile.end);
-            long length = toFile.tellg();
-            if (length > pg->pageNumberOnDisk * pageSize) {
-                toFile.close();
-                ofstream toFile(filePath,ofstream::out);
-                toFile.seekp(pg->pageNumberOnDisk * pageSize, ios::beg);
-                toFile.write(pg->page, pageSize);
-                toFile.flush();
-                toFile.close();
-            } else {
-                toFile.close();
-                ofstream toFile(filePath,ofstream::ate);
-                while (length<= pg->pageNumberOnDisk * pageSize) {
-                    toFile.write(pg->page, pageSize);
-                    toFile.flush();
-                    length = toFile.tellp();
-                }
-                toFile.seekp(pg->pageNumberOnDisk * pageSize, ios::beg);
-                toFile.write(pg->page, pageSize);
-                toFile.flush();
-                toFile.close();
-            }
+        int fd = open(filePath.c_str(), O_SYNC|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+        if (fd<0) {
+            cout<<"File opening error: "<<errno<<endl;
+        }else{
+            lseek(fd, pg->pageNumberOnDisk*pageSize, SEEK_SET);
+            if ((write(fd, pg->page,pageSize))<0) cout<<"File writing error: "<<errno<<endl;
+            if (close(fd) < 0) cout<<"File Descriptor closing error: "<<errno<<endl;
         }
     }
-    
+        
     string key = getKey(pg->tablePtr, pg->pageNumberOnDisk);
     pageLookUp.erase(key);
 }
@@ -218,15 +209,6 @@ string MyDB_BufferManager :: getKey(MyDB_TablePtr tablePtr, long i) {
     else {
         return "";
     }
-}
-
-void MyDB_BufferManager :: markTempSpace () {
-    std::ofstream toFile (tempFile->getStorageLoc(),std::ofstream::app);
-    char* junk = (char*) malloc(pageSize);
-    toFile.write(junk, pageSize);
-    toFile.flush();
-    toFile.close();
-    free(junk);
 }
 
 void MyDB_BufferManager:: pin (MyDB_PageHandle pinMe){
