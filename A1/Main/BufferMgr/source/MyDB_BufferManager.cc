@@ -153,15 +153,43 @@ MyDB_BufferPage* MyDB_BufferManager :: getNewPage(MyDB_TablePtr ptr, long pn){
 
 void MyDB_BufferManager:: evictPage(MyDB_BufferPage* pg){
     string filePath = pg->tablePtr->getStorageLoc();
-    string key = getKey(pg->tablePtr, pg->pageNumberOnDisk);
     if (pg->isDirty) {
-        std::ofstream toFile (filePath,std::ofstream::in);
-        toFile.seekp(pg->pageNumberOnDisk * pageSize, ios::beg);
-        toFile.write(pg->page, pageSize);
-        toFile.flush();
-        toFile.close();
+        fstream toFile = fstream(filePath);
+        if (!toFile){
+            toFile.close();
+            ofstream toFile(filePath,ofstream::out);
+            for (int i =0; i< pg->pageNumberOnDisk; i++) {
+                toFile.write(pg->page, pageSize);
+                toFile.flush();
+            }
+            toFile.close();
+        } else {
+            toFile.seekg (ios::beg, toFile.end);
+            long length = toFile.tellg();
+            if (length > pg->pageNumberOnDisk * pageSize) {
+                toFile.close();
+                ofstream toFile(filePath,ofstream::out);
+                toFile.seekp(pg->pageNumberOnDisk * pageSize, ios::beg);
+                toFile.write(pg->page, pageSize);
+                toFile.flush();
+                toFile.close();
+            } else {
+                toFile.close();
+                ofstream toFile(filePath,ofstream::ate);
+                while (length<= pg->pageNumberOnDisk * pageSize) {
+                    toFile.write(pg->page, pageSize);
+                    toFile.flush();
+                    length = toFile.tellp();
+                }
+                toFile.seekp(pg->pageNumberOnDisk * pageSize, ios::beg);
+                toFile.write(pg->page, pageSize);
+                toFile.flush();
+                toFile.close();
+            }
+        }
     }
     
+    string key = getKey(pg->tablePtr, pg->pageNumberOnDisk);
     pageLookUp.erase(key);
 }
 
