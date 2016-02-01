@@ -16,7 +16,7 @@
 using namespace std;
 
 class MyDB_BufferPage {
-    
+
 public:
     bool isDirty;
     long counter;
@@ -24,13 +24,16 @@ public:
     MyDB_TablePtr tablePtr;
     long pageNumberOnDisk;
     int numReference;
-        
+
+    // creates a BufferPage.
     MyDB_BufferPage (char* buf, long count, MyDB_TablePtr ptr, long pn);
-    
+
+    // destroys a BufferPage.
     ~MyDB_BufferPage ();
-    
+
+    // sets page dirty.
     void isWriten();
-        
+
 };
 
 

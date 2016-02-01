@@ -44,6 +44,7 @@ public:
 
 	// FEEL FREE TO ADD ADDITIONAL PUBLIC METHODS
     
+	// creates a PageHandleBase.
     MyDB_PageHandleBase (MyDB_TablePtr table, long i, MyDB_BufferManager* bufMgr);
     
 private:
